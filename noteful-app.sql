@@ -1,3 +1,5 @@
+-- psql -U dev -d noteful-app -f ./noteful-app.sql
+
 -- Create a table SQL script
 DROP TABLE IF EXISTS notes;
 
