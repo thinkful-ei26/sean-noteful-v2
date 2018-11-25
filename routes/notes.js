@@ -11,20 +11,24 @@ const router = express.Router();
 // const notes = simDB.initialize(data);
 
 const knex = require('../knex');
+const hydrateNotes = require('../utils/hydrateNotes');
 
 // Get All (and search by query)
 router.get('/', (req, res, next) => {
-  const { searchTerm, folderId } = req.query;
+  const { searchTerm, folderId, tagId } = req.query;
 
   knex('notes')
-    .select('notes.id', 'title', 'content', 'folders.id as folderId', 'folders.name as folderName')
+    .select('notes.id', 'title', 'content', 'folders.id as folderId', 'folders.name as folderName', 'tags.id as tagId', 'tags.name as tagName')
     .leftJoin('folders', 'notes.folder_id', 'folders.id')
+    .leftJoin('notes_tags', 'notes.id', 'notes_tags.note_id')
+    .leftJoin('tags', 'notes_tags.tag_id', 'tags.id')
     .modify(queryBuilder => {
       if (searchTerm) queryBuilder.where('title', 'like', `%${searchTerm}%`);
       if (folderId) queryBuilder.where('folder_id', folderId);
+      if (tagId) queryBuilder.where('tag_id', tagId);
     })
     .orderBy('notes.id')
-    .then(results => res.json(results))
+    .then(results => res.json(hydrateNotes(results)))
     .catch(err => next(err));
 });
 
@@ -33,11 +37,13 @@ router.get('/:id', (req, res, next) => {
   const id = req.params.id;
 
   knex('notes')
-    .select('notes.id', 'title', 'content', 'folders.id as folderId', 'folders.name as folderName')
+    .select('notes.id', 'title', 'content', 'folders.id as folderId', 'folders.name as folderName', 'tags.id as tagId', 'tags.name as tagName')
     .leftJoin('folders', 'notes.folder_id', 'folders.id')
+    .leftJoin('notes_tags', 'notes.id', 'notes_tags.note_id')
+    .leftJoin('tags', 'notes_tags.tag_id', 'tags.id')
     .where({'notes.id': id})
     .then(results => {
-      if (results[0]) res.json(results[0]);
+      if (results) res.json(hydrateNotes(results));
       else next();
     })
     .catch(err => next(err));
