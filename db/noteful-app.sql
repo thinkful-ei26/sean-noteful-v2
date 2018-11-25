@@ -1,6 +1,8 @@
 -- psql -U dev -d noteful-app -f ./db/noteful-app.sql
 
 -- Create a table SQL script
+DROP TABLE IF EXISTS notes_tags;
+DROP TABLE IF EXISTS tags;
 DROP TABLE IF EXISTS notes;
 DROP TABLE IF EXISTS folders;
 
@@ -15,6 +17,16 @@ CREATE TABLE notes(
   content text,
   created timestamp DEFAULT now(),
   folder_id int REFERENCES folders(id) ON DELETE SET NULL
+);
+
+CREATE TABLE tags(
+  id serial PRIMARY KEY,
+  name text NOT NULL UNIQUE
+);
+
+CREATE TABLE notes_tags(
+  note_id int NOT NULL REFERENCES notes ON DELETE CASCADE,
+  tag_id int NOT NULL REFERENCES tags ON DELETE CASCADE
 );
 
 -- Bonus Challenge: alter sequence filed so that ids start at 1000
@@ -42,3 +54,19 @@ INSERT INTO notes
   ('11 ways investing in cats can make you a millionaire', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.', 101),
   ('Why you should forget everything you learned about cats', 'Posuere sollicitudin aliquam ultrices sagittis orci a. Feugiat sed lectus vestibulum mattis ullamcorper velit. Odio pellentesque diam volutpat commodo sed egestas egestas fringilla. Velit egestas dui id ornare arcu odio. Molestie at elementum eu facilisis sed odio morbi. Tempor nec feugiat nisl pretium. At tempor commodo ullamcorper a lacus. Egestas dui id ornare arcu odio. Id cursus metus aliquam eleifend. Vitae sapien pellentesque habitant morbi tristique. Dis parturient montes nascetur ridiculus. Egestas egestas fringilla phasellus faucibus scelerisque eleifend. Aliquam faucibus purus in massa tempor nec feugiat nisl.', 101);
   -- RETURNING id, title;
+INSERT INTO tags (name) VALUES
+  ('tag1'),
+  ('tag2');
+INSERT INTO notes_tags (note_id, tag_id) VALUES
+  (1000, 1),
+  (1001, 1),
+  (1002, 1),
+  (1003, 1),
+  (1004, 2),
+  (1005, 2),
+  (1006, 2),
+  (1007, 2),
+  (1008, 1),
+  (1008, 2),
+  (1009, 1),
+  (1009, 2);
