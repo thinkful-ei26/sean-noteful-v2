@@ -43,7 +43,7 @@ router.get('/:id', (req, res, next) => {
     .leftJoin('tags', 'notes_tags.tag_id', 'tags.id')
     .where({'notes.id': id})
     .then(results => {
-      if (results) res.json(hydrateNotes(results));
+      if (results) res.json(hydrateNotes(results)[0]);
       else next();
     })
     .catch(err => next(err));
