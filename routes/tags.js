@@ -5,7 +5,7 @@ const router = express.Router();
 const knex = require('../knex');
 
 router.get('/', (req, res, next) => {
-  knex('folders')
+  knex('tags')
     .select('id', 'name')
     .then(results => res.json(results))
     .catch(err => next(err));
@@ -14,7 +14,7 @@ router.get('/', (req, res, next) => {
 router.get('/:id', (req, res, next) => {
   const id = req.params.id;
 
-  knex('folders')
+  knex('tags')
     .select('id', 'name')
     .where({id})
     .then(([result]) => {
@@ -35,7 +35,7 @@ router.put('/:id', (req, res, next) => {
     return next(err);
   }
 
-  knex('folders')
+  knex('tags')
     .returning('id', 'name')
     .where({id})
     .update(updateObj)
@@ -51,23 +51,21 @@ router.post('/', (req, res, next) => {
   const newItem = {name};
   if (!newItem.name) {
     const err = new Error('Missing `name` in request body');
-    err.status = 400;
+    err.status = 404;
     return next(err);
   }
 
-  knex('folders')
+  knex('tags')
     .returning('id', 'name')
     .insert(newItem)
-    .then(([result]) => {
-      if (result) res.location(`http://${req.headers.host}/folders/${result.id}`).status(201).json(result);
-    })
+    .then(([result]) => res.location(`${req.originalUrl}/${result.id}`).status(201).json(result))
     .catch(err => next(err));
 });
 
 router.delete('/:id', (req, res, next) => {
   const id = req.params.id;
 
-  knex('folders')
+  knex('tags')
     .where({id})
     .del()
     .then(() => res.sendStatus(204))
